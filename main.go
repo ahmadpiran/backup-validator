@@ -15,6 +15,22 @@ func main() {
 
 	filePath := os.Args[1]
 
+	fi, err := os.Stat(filePath)
+
+	if err != nil {
+		if os.IsNotExist(err) {
+			fmt.Printf("Error: file not found at %s\n", filePath)
+			os.Exit(1)
+		}
+
+		fmt.Printf("Error checking file %v\n", err)
+		os.Exit(1)
+	}
+
+	if fi.IsDir() {
+		fmt.Printf("Error: Path %s is a directory, not a file.\n", filePath)
+		os.Exit(1)
+	}
 	// Just print it for now
-	fmt.Printf("Received backup file path: %s\n", filePath)
+	fmt.Printf("Success: Found valid file: %s (Size: %d bytes)\n", filePath, fi.Size())
 }
