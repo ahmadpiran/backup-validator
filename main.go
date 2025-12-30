@@ -122,4 +122,26 @@ func main() {
 
 	fmt.Println("Success: File copied to /tmp/backup.sql inside container.")
 
+	fmt.Println("Restoring backup (This might take a moment)...")
+
+	restoreCmd := exec.Command("docker", "exec",
+		containerID,
+		"psql",
+		"-U", "postgres",
+		"-v", "ON_ERROR_STOP=1",
+		"-f", "/tmp/backup.sql",
+	)
+
+	output, restoreCmdErr := restoreCmd.CombinedOutput()
+
+	if restoreCmdErr != nil {
+		fmt.Println("❌ Validation FAILED.")
+		fmt.Printf("Restore Error Log:\n%s\n", string(output))
+
+		exec.Command("docker", "stop", containerID).Run()
+		os.Exit(1)
+	}
+
+	fmt.Println("✅ Validation PASSED: Backup restored successfully without errors.")
+
 }
