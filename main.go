@@ -144,4 +144,12 @@ func main() {
 
 	fmt.Println("✅ Validation PASSED: Backup restored successfully without errors.")
 
+	fmt.Println("Cleaning up resources...")
+
+	if dockerStopErr := exec.Command("docker", "stop", containerID).Run(); dockerStopErr != nil {
+		fmt.Printf("Warning: Failed to stop container %s: %v\n", containerID, dockerStopErr)
+	} else {
+		fmt.Println("Success: Container stopped and removed.")
+	}
+
 }
