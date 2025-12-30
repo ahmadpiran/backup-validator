@@ -109,4 +109,17 @@ func main() {
 		os.Exit(1)
 	}
 
+	fmt.Println("Copying backup file to container...")
+	destination := containerID + ":/tmp/backup.sql"
+
+	cpCmd := exec.Command("docker", "cp", filePath, destination)
+
+	if cpCmdErr := cpCmd.Run(); cpCmdErr != nil {
+		fmt.Printf("Error: Failed to copy file to container: %v\n", cpCmdErr)
+		exec.Command("docker", "stop", containerID).Run()
+		os.Exit(1)
+	}
+
+	fmt.Println("Success: File copied to /tmp/backup.sql inside container.")
+
 }
