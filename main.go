@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 )
 
 func main() {
@@ -83,5 +84,29 @@ func main() {
 	}
 
 	fmt.Printf("Success: Container started. ID: %s\n", shortID)
+
+	fmt.Println("Waiting for database to initialize...")
+
+	maxRetries := 10
+	isReady := false
+
+	for i := 0; i < maxRetries; i++ {
+		checkCmd := exec.Command("docker", "exec", containerID, "pg_isready", "-U", "postgres")
+
+		if checkCmdErr := checkCmd.Run(); checkCmdErr == nil {
+			isReady = true
+			fmt.Println("Database is ready!")
+			break
+		}
+
+		fmt.Printf("Database not ready yet... retrying (%d/%d)\n", i+1, maxRetries)
+		time.Sleep(2 * time.Second)
+	}
+
+	if !isReady {
+		fmt.Println("Error: Database timed out and did not start.")
+		exec.Command("docker", "stop", containerID).Run()
+		os.Exit(1)
+	}
 
 }
